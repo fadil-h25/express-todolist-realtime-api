@@ -1,0 +1,183 @@
+openapi: "3.0.3"
+info:
+  title: Express Todolist API
+  version: "1.0"
+servers:
+  - url: https://api.server.test/v1
+
+components:
+  securitySchemes:
+    AccessToken:
+      description: Access token in cookie
+      type: apiKey
+      in: cookie
+      name: token
+    RefreshToken:
+      description: Refresh token in cookie
+      type: apiKey
+      in: cookie
+      name: refreshToken
+    CsrfToken:
+      description: CSRF token in header
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+
+  responses:
+    UnauthorizedError:
+      description: status code 401 | Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Unauthorized
+    AccessDeniedError:
+      description: status code 403 | Access denied
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Access denied
+    ServerError:
+      description: status code 500 | Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Internal server error
+    InvalidRequest:
+      description: status code 400 | Invalid request parameters
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Invalid request parameters
+              errors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                      example: email
+                    message:
+                      type: string
+                      example: Email is required
+    TodoNotFound:
+      description: status code 404 | Todo item not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Todo item not found
+
+  schemas:
+    userLoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: johndoe@example.com
+        password:
+          type: string
+          example: sucuredpassword123
+
+    authResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Logged in successfully
+        user:
+          $ref: "#/components/schemas/userResponse"
+        accessToken:
+          type: string
+          example: "jwt_access_token_here"
+        refreshToken:
+          type: string
+          example: "jwt_refresh_token_here"
+
+# Security global
+security:
+  - AccessToken: []
+  - CsrfToken: []
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/userCreateRequest"
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/authResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /auth/login:
+    post:
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/userLoginRequest"
+      responses:
+        "200":
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/authResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/ServerError"
