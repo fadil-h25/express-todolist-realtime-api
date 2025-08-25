@@ -1,44 +1,16 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    // File Layout
-    "rootDir": "./src",
-    "outDir": "./dist",
-
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
-    "target": "esnext",
-    "types": [],
-    // For nodejs:
-    // "lib": ["esnext"],
-    // "types": ["node"],
-    // and npm install -D @types/node
-
-    // Other Outputs
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-
-    // Stricter Typechecking Options
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-
-    // Style Options
-    // "noImplicitReturns": true,
-    // "noImplicitOverride": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    // "noFallthroughCasesInSwitch": true,
-    // "noPropertyAccessFromIndexSignature": true,
-
-    // Recommended Options
-    "strict": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
-    "skipLibCheck": true
-  }
+    "target": "es2020", // target modern JS
+    "module": "esnext", // output ES Modules
+    "moduleResolution": "node", // resolve modul seperti Node
+    "esModuleInterop": true, // supaya bisa import default express
+    "forceConsistentCasingInFileNames": true,
+    "strict": true, // strict type checking
+    "skipLibCheck": true, // skip tipe library untuk compile lebih cepat
+    "outDir": "./dist", // hasil compile
+    "rootDir": "./src", // source ts
+    "sourceMap": true // debugging
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
