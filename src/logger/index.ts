@@ -4,7 +4,6 @@ import { format } from "winston";
 export const logger = winston.createLogger({
   level: "debug",
   format: format.combine(format.timestamp(), format.json()),
-  defaultMeta: { service: "user-service" },
   transports: [
     new winston.transports.Console({}),
     //
