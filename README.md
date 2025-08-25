@@ -53,6 +53,7 @@ Proyek ini ditujukan untuk belajar menerapkan praktik terbaik dalam pengembangan
 
 ## Struktur Projek
 
+```
 app/
 ├── docs/
 ├── src/
@@ -70,3 +71,4 @@ app/
 ├── package.json
 ├── package-lock.json
 └── tsconfig.json
+```
