@@ -21,7 +21,7 @@ globalMiddleware.forEach((middleware) => app.use(middleware));
 app.get("/test", (req: Request, res: Response) => {
   logger.info(
     "request received",
-    generateLogMetaData(req.requestId as string, req.route.path, "main")
+    generateLogMetaData(req.context.reqId, req.route.path, "main", "main")
   );
   res.send("Hello World!");
 });
