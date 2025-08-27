@@ -5,6 +5,8 @@ import { logger } from "./logger/index.js";
 import { generateLogMetaData } from "./helper/generate-log-meta-data.js";
 import dotenv from "dotenv";
 import { checkDatabaseConnection } from "./database/index.js";
+import { ErrorHandlerMiddleware } from "./middleware/error-handler-middleware.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -13,6 +15,7 @@ checkDatabaseConnection();
 const port = 3000;
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 // Aplly global middlewares
@@ -26,6 +29,7 @@ app.get("/test", (req: Request, res: Response) => {
   res.send("Hello World!");
 });
 
+app.use(ErrorHandlerMiddleware);
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
