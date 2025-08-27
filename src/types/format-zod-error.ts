@@ -1,4 +1,4 @@
 export type FormatZodError = {
-  path: string[];
+  path: any[];
   message: string;
 };
