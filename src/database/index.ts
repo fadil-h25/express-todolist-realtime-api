@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 
 import { logger } from "../logger/index.js";
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
 export async function checkDatabaseConnection() {
   try {

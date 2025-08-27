@@ -19,7 +19,6 @@ Proyek ini dibuat untuk tujuan belajar dan menerapkan fitur backend modern seper
 Proyek ini memungkinkan banyak pengguna untuk membuat, mengelola, dan membagikan daftar todo mereka secara **real-time**.  
 Proyek ini digunakan untuk berlatih:
 
-- Arsitektur yang rapi (Clean Architecture)
 - Logging dengan **Winston**
 - Rate limiting
 - Autentikasi JWT dengan token rotation

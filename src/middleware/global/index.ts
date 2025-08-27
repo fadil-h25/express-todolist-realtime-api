@@ -1,3 +1,3 @@
-import { RequestIdMiddleware } from "./request-id-middleware.js";
+import { RequestContextMiddleware } from "./reqeust-context-middleware.js";
 
-export const globalMiddleware = [RequestIdMiddleware];
+export const globalMiddleware = [RequestContextMiddleware];
