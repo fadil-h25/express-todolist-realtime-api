@@ -5,7 +5,7 @@ import { logger } from "../../logger/index.js";
 import { generateLogMetaData } from "../../helper/generate-log-meta-data.js";
 import { UserService, userServiceInstance } from "../user/user-service.js";
 import e from "express";
-import { prisma } from "../../database";
+import { prisma } from "../../database/index.js";
 import { AuthLoginRequest, AuthRegisterRequest } from "./dto/auth-request.js";
 import jwt from "jsonwebtoken";
 import { CustomError } from "../../error/CustomError.js";

@@ -28,7 +28,7 @@ export async function register(
   try {
     const validationBody = validate(AuthRegisterSchema, req.body);
 
-    authServiceInstance.register(req.context, validationBody);
+    await authServiceInstance.register(req.context, validationBody);
     return res.sendStatus(201);
   } catch (error) {
     next(error);
