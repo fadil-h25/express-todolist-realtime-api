@@ -5,6 +5,7 @@ import { UserResponseForLogin } from "./dto/user-response";
 import { logger } from "../../logger";
 import { generateLogMetaData } from "../../helper/generate-log-meta-data";
 import { prisma } from "../../database";
+import { CreateUserRequest } from "./dto/user-request";
 
 const serviceName = "user-service";
 const domainName = "user";
@@ -29,6 +30,27 @@ export class UserService {
 
     return db.user.findUnique({
       where: { email },
+    });
+  }
+
+  async createUserForRegsiter(
+    ctx: Context,
+    data: CreateUserRequest,
+    tx?: Prisma.TransactionClient
+  ) {
+    const db = tx ?? this.prisma;
+    logger.debug(
+      "createUser() running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
+
+    await db.user.create({
+      data: {
+        email: data.email,
+        password: data.password,
+        name: data.name,
+        role: data.role ?? "USER",
+      },
     });
   }
 }
