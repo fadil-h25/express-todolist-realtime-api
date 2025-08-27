@@ -1,5 +1,37 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
+import { authServiceInstance } from "./auth-service";
+import { validate } from "../../validation/validate";
+import { AuthLoginSchema, AuthRegisterSchema } from "./schema/auth-schema";
+import { CustomError } from "../../error/CustomError";
 
-export function login(req: Request, res: Response) {}
+export async function login(req: Request, res: Response, next: NextFunction) {
+  try {
+    const validationBody = validate(AuthLoginSchema, req.body);
+    const token = await authServiceInstance.login(req.context, validationBody);
+    res.cookie("access_token", token, {
+      httpOnly: true,
+      secure: false, // set to true if using https
+      sameSite: "lax",
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
 
-export function register(req: Request, res: Response) {}
+    return res.sendStatus(201);
+  } catch (error) {
+    next(new CustomError("Login failed", 401));
+  }
+}
+
+export async function register(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const validationBody = validate(AuthRegisterSchema, req.body);
+
+    authServiceInstance.register(req.context, validationBody);
+    return res.sendStatus(201);
+  } catch (error) {
+    next(error);
+  }
+}
