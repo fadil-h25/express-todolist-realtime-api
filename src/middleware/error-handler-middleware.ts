@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { CustomError } from "../error/CustomError";
-import { ResponseErrorBody } from "../types/response/response-error-body";
-import { logger } from "../logger";
+import { CustomError } from "../error/CustomError.js";
+import { ResponseErrorBody } from "../types/response/response-error-body.js";
+import { logger } from "../logger/index.js";
 import { ZodError } from "zod";
-import { ZodErrorMapper } from "../helper/zod-error-mapper";
+import { ZodErrorMapper } from "../helper/zod-error-mapper.js";
 
 export const ErrorHandlerMiddleware = (
   err: unknown,

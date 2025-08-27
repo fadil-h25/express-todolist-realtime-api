@@ -4,7 +4,7 @@ import {
   userNameSchema,
   userPasswordSchema,
   userRoleSchema,
-} from "../../user/schema/user-schema";
+} from "../../user/schema/user-schema.js";
 
 export const AuthLoginSchema = z.object({
   email: userEmailSchema,

@@ -1,5 +1,4 @@
 import { z, ZodType } from "zod";
-import { CustomError } from "../error/CustomError";
 
 export function validate<T>(schema: ZodType<T>, data: unknown): T {
   try {

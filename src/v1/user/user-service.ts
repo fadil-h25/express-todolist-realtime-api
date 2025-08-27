@@ -1,11 +1,11 @@
 // src/v1/user/user-service.ts
 import { PrismaClient, Prisma } from "@prisma/client";
-import { Context } from "../../types/context";
-import { UserResponseForLogin } from "./dto/user-response";
-import { logger } from "../../logger";
-import { generateLogMetaData } from "../../helper/generate-log-meta-data";
-import { prisma } from "../../database";
-import { CreateUserRequest } from "./dto/user-request";
+import { Context } from "../../types/context.js";
+import { UserResponseForLogin } from "./dto/user-response.js";
+import { logger } from "../../logger/index.js";
+import { generateLogMetaData } from "../../helper/generate-log-meta-data.js";
+import { prisma } from "../../database/index.js";
+import { CreateUserRequest } from "./dto/user-request.js";
 
 const serviceName = "user-service";
 const domainName = "user";

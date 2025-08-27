@@ -1,8 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
-import { authServiceInstance } from "./auth-service";
-import { validate } from "../../validation/validate";
-import { AuthLoginSchema, AuthRegisterSchema } from "./schema/auth-schema";
-import { CustomError } from "../../error/CustomError";
+import { authServiceInstance } from "./auth-service.js";
+import { validate } from "../../validation/validate.js";
+import { AuthLoginSchema, AuthRegisterSchema } from "./schema/auth-schema.js";
 
 export async function login(req: Request, res: Response, next: NextFunction) {
   try {

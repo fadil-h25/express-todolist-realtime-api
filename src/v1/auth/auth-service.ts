@@ -1,14 +1,14 @@
 // src/v1/auth/auth-service.ts
 import { PrismaClient, Prisma } from "@prisma/client";
-import { Context } from "../../types/context";
-import { logger } from "../../logger";
-import { generateLogMetaData } from "../../helper/generate-log-meta-data";
-import { UserService, userServiceInstance } from "../user/user-service";
+import { Context } from "../../types/context.js";
+import { logger } from "../../logger/index.js";
+import { generateLogMetaData } from "../../helper/generate-log-meta-data.js";
+import { UserService, userServiceInstance } from "../user/user-service.js";
 import e from "express";
 import { prisma } from "../../database";
-import { AuthLoginRequest, AuthRegisterRequest } from "./dto/auth-request";
+import { AuthLoginRequest, AuthRegisterRequest } from "./dto/auth-request.js";
 import jwt from "jsonwebtoken";
-import { CustomError } from "../../error/CustomError";
+import { CustomError } from "../../error/CustomError.js";
 import bcrypt from "bcrypt";
 
 const serviceName = "auth-service";
