@@ -17,7 +17,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
     return res.sendStatus(201);
   } catch (error) {
-    next(new CustomError("Login failed", 401));
+    next(error);
   }
 }
 
