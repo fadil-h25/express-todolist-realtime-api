@@ -1,14 +1,14 @@
 import z from "zod";
 
-const todoIdSchema = z.uuid();
-const todoTitleSchema = z.string().min(1);
-const todoStatusSchema = z.enum(["PENDING", "IN_PROGRESS", "COMPLETED"]);
-const todoIsPublicSchema = z.boolean().default(false);
+export const todoIdSchema = z.uuid();
+export const todoTitleSchema = z.string().min(1);
+export const todoStatusSchema = z.enum(["PENDING", "PROGRESS", "COMPLETED"]);
+export const todoIsPublicSchema = z.boolean().default(false);
 
 export const CreateTodoSchema = z.object({
   title: todoTitleSchema,
-  isPublic: todoIsPublicSchema.optional(),
-  todoStatus: todoStatusSchema.optional(),
+  isPublic: todoIsPublicSchema.optional().default(false),
+  todoStatus: todoStatusSchema.optional().default("PENDING"),
 });
 
 export const UpdateTodoSchema = z.object({
