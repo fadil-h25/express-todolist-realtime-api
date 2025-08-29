@@ -8,3 +8,8 @@ export type UserResponseForLogin = {
   id: string;
   role: UserRole;
 };
+
+export interface UserUpdateMe {
+  id: string;
+  name: string;
+}

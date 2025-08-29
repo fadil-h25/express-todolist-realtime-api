@@ -1,11 +1,11 @@
 // src/v1/user/user-service.ts
 import { PrismaClient, Prisma } from "@prisma/client";
 import { Context } from "../../types/context.js";
-import { UserResponseForLogin } from "./dto/user-response.js";
+import { UserResponseForLogin, UserUpdateMe } from "./dto/user-response.js";
 import { logger } from "../../logger/index.js";
 import { generateLogMetaData } from "../../helper/generate-log-meta-data.js";
 import { prisma } from "../../database/index.js";
-import { CreateUserRequest } from "./dto/user-request.js";
+import { CreateUserRequest, UpdateUserRequest } from "./dto/user-request.js";
 
 const serviceName = "user-service";
 const domainName = "user";
@@ -53,6 +53,34 @@ export class UserService {
       },
     });
   }
+
+  async updateUser(
+    ctx: Context,
+    data: UpdateUserRequest,
+    tx?: Prisma.TransactionClient
+  ): Promise<UserUpdateMe> {
+    const db = tx ?? this.prisma;
+    logger.debug(
+      "updateUser() running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
+
+    const updatedUser = await db.user.update({
+      where: {
+        id: ctx.userId as string,
+      },
+      data: {
+        name: data.name,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    return updatedUser;
+  }
+  async deleteMe() {}
 }
 
 // user-service.ts
