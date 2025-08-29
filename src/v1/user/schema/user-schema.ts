@@ -13,3 +13,7 @@ export const CreateUserSchema = z.object({
   name: userNameSchema,
   role: userRoleSchema.optional().default("USER"),
 });
+
+export const UpdateUserSchema = z.object({
+  name: userNameSchema.optional(),
+});
