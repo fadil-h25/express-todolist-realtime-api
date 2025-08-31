@@ -42,7 +42,7 @@ export class AuthService {
     if (!compareResult) throw new CustomError("Invalid email or password", 401);
 
     return jwt.sign(
-      { sub: user.id, email: user.email },
+      { userId: user.id, role: user.role },
       process.env.JWT_SECRET!,
       { expiresIn: "1h" }
     );
