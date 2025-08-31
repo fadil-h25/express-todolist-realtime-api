@@ -9,6 +9,8 @@ import { ErrorHandlerMiddleware } from "./middleware/error-handler-middleware.js
 import cookieParser from "cookie-parser";
 import { authRoute } from "./v1/auth/auth-route.js";
 import { todoRouter } from "./v1/todo/todo-route.js";
+import { CustomError } from "./error/CustomError.js";
+import { AuthRequestiddleware } from "./middleware/auth-request-middleware.js";
 
 dotenv.config();
 
@@ -20,11 +22,17 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
+const secretKey = process.env.SECRET_KEY;
+if (!secretKey) throw new CustomError("Secret key is null", 500);
+
 // Aplly global middlewares
 globalMiddleware.forEach((middleware) => app.use(middleware));
 
+//public route
 app.use("/auth", authRoute);
 
+//private route
+app.use(AuthRequestiddleware);
 app.use("/todos", todoRouter);
 
 app.use(ErrorHandlerMiddleware);
