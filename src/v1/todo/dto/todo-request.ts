@@ -1,5 +1,5 @@
 import z from "zod";
 import { CreateTodoSchema, UpdateTodoSchema } from "../schema/todo-schema";
 
-export type TodoCreateRequest = z.infer<typeof CreateTodoSchema>;
-export type TodoUpdateRequest = z.infer<typeof UpdateTodoSchema>;
+export type CreateTodoRequest = z.infer<typeof CreateTodoSchema>;
+export type UpdateTodoRequest = z.infer<typeof UpdateTodoSchema>;

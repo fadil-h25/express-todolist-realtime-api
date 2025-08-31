@@ -8,6 +8,7 @@ import { checkDatabaseConnection } from "./database/index.js";
 import { ErrorHandlerMiddleware } from "./middleware/error-handler-middleware.js";
 import cookieParser from "cookie-parser";
 import { authRoute } from "./v1/auth/auth-route.js";
+import { todoRouter } from "./v1/todo/todo-route.js";
 
 dotenv.config();
 
@@ -22,15 +23,9 @@ app.use(express.urlencoded({ extended: true }));
 // Aplly global middlewares
 globalMiddleware.forEach((middleware) => app.use(middleware));
 
-app.get("/test", (req: Request, res: Response) => {
-  logger.info(
-    "request received",
-    generateLogMetaData(req.context.reqId, req.route.path, "main", "main")
-  );
-  res.send("Hello World!");
-});
-
 app.use("/auth", authRoute);
+
+app.use("/todos", todoRouter);
 
 app.use(ErrorHandlerMiddleware);
 app.listen(port, () => {
