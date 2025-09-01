@@ -27,8 +27,8 @@ model User{
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   role     UserRole @default(USER)
-  todos    Todo[]
-  todoMember TodoMember[]
+  todolists    Todolist[]
+  todoMember TodolistMember[]
   @@map("users")
 }
 
@@ -40,22 +40,40 @@ enum TodoStatus{
 model Todo{
   id        String   @id @default(uuid())
   title     String
+  description String?
   status    TodoStatus @default(PENDING)
-  ownerId    String
-  isPublic  Boolean  @default(false)
-  user      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  todoMember TodoMember[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  todolistId String
+
+  Todolists Todolist @relation(fields: [todolistId], references: [id])
   @@map("todos")
 }
 
-model TodoMember{
+model Todolist{
   id        String   @id @default(uuid())
-  todoId    String
+  title     String
+  description String?
+  ownerId    String
+  isPublic  Boolean  @default(false)
+  user      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  todolistMember TodolistMember[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  todos Todo[]
+  @@map("todolists")
+  
+}
+
+
+
+model TodolistMember{
+  id        String   @id @default(uuid())
+  todolistId    String
   userId    String
-  todo      Todo     @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  todolist   Todolist     @relation(fields: [todolistId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@unique([todoId, userId])
-  @@map("todo_members")
+  @@unique([todolistId, userId])
+  @@map("todolist_members")
 }
