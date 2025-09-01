@@ -3,7 +3,7 @@ import { prisma } from "../../database/index.js";
 import { Context } from "../../types/context.js";
 import { CreateTodoSchema, UpdateTodoSchema } from "./schema/todo-schema.js";
 import { CreateTodoRequest, UpdateTodoRequest } from "./dto/todo-request.js";
-import { TodoResponse } from "./dto/todo-response.js";
+import { TodoResponse, TodoResponseDetails } from "./dto/todo-response.js";
 import { CustomError } from "../../error/CustomError.js";
 
 export class TodoService {
@@ -18,29 +18,29 @@ export class TodoService {
     await db.todo.create({
       data: {
         title: data.title,
-        isPublic: data.isPublic,
         status: data.todoStatus,
-        ownerId: ctx.userId as string,
+        description: data.description,
+        todolistId: data.todolistId,
       },
     });
   }
 
   async getTodos(
     ctx: Context,
+    todolistId: string,
     tx?: Prisma.TransactionClient
   ): Promise<TodoResponse[]> {
     const db = tx ?? prisma;
     const todos = await db.todo.findMany({
       where: {
-        ownerId: ctx.userId,
+        todolistId,
       },
 
       select: {
         id: true,
         title: true,
-        isPublic: true,
         status: true,
-        ownerId: true,
+        todolistId: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -53,21 +53,20 @@ export class TodoService {
     ctx: Context,
     id: string,
     tx?: Prisma.TransactionClient
-  ): Promise<TodoResponse> {
+  ): Promise<TodoResponseDetails> {
     const db = tx ?? prisma;
     const todo = await db.todo.findFirst({
       where: {
         id,
-        ownerId: ctx.userId,
       },
       select: {
         id: true,
         title: true,
-        isPublic: true,
         status: true,
-        ownerId: true,
+        description: true,
         createdAt: true,
         updatedAt: true,
+        todolistId: true,
       },
     });
 
@@ -83,11 +82,10 @@ export class TodoService {
     const updatedTodo = await prisma.todo.update({
       where: {
         id: data.id,
-        ownerId: ctx.userId,
       },
       data: {
         title: data.title ?? undefined,
-        isPublic: data.isPublic ?? undefined,
+        description: data.description ?? undefined,
         status: data.todoStatus ?? undefined,
       },
     });
@@ -100,7 +98,6 @@ export class TodoService {
     const todoId = await db.todo.deleteMany({
       where: {
         id,
-        ownerId: ctx.userId,
       },
     });
 
