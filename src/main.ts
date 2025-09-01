@@ -11,6 +11,7 @@ import { authRoute } from "./v1/auth/auth-route.js";
 import { todoRouter } from "./v1/todo/todo-route.js";
 import { CustomError } from "./error/CustomError.js";
 import { AuthRequestiddleware } from "./middleware/auth-request-middleware.js";
+import { todolistRouter } from "./v1/todolist/todolist-router.js";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use("/auth", authRoute);
 
 //private route
 app.use(AuthRequestiddleware);
+app.use("/todolist", todolistRouter);
 app.use("/todos", todoRouter);
 
 app.use(ErrorHandlerMiddleware);
