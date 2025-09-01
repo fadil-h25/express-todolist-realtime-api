@@ -40,7 +40,7 @@ export class UserService {
   ) {
     const db = tx ?? this.prisma;
     logger.debug(
-      "createUser() running",
+      "createUserForRegsiter() running",
       generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
     );
 
@@ -80,7 +80,15 @@ export class UserService {
 
     return updatedUser;
   }
-  async deleteMe() {}
+
+  async deleteMe(ctx: Context, tx?: Prisma.TransactionClient) {
+    const db = tx ?? this.prisma;
+    logger.debug(
+      "deleteMe() running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
+    // implementasi delete user nanti di sini
+  }
 }
 
 // user-service.ts
