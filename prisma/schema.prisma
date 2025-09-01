@@ -66,11 +66,15 @@ model Todolist{
   
 }
 
-
+enum TodolistMemberRole{
+  VISITOR
+  EDITOR
+}
 
 model TodolistMember{
   id        String   @id @default(uuid())
   todolistId    String
+  role         TodolistMemberRole @default(VISITOR)
   userId    String
   todolist   Todolist     @relation(fields: [todolistId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
