@@ -5,7 +5,7 @@ import {
   handleGetTodolistById,
   handleGetTodolists,
   handleUpdateTodolistById,
-} from "./todolist-controller";
+} from "./todolist-controller.js";
 
 export const todolistRouter = express.Router();
 
