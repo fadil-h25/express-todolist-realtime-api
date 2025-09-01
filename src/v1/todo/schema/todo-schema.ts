@@ -4,6 +4,7 @@ export const todoIdSchema = z.uuid();
 export const todoTitleSchema = z.string().min(1);
 export const todoStatusSchema = z.enum(["PENDING", "PROGRESS", "COMPLETED"]);
 export const todoIsPublicSchema = z.boolean().default(false);
+export const todoDescriptionSchema = z.string().optional();
 
 export const CreateTodoSchema = z.object({
   title: todoTitleSchema,
