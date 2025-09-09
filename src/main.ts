@@ -12,6 +12,7 @@ import { todoRouter } from "./v1/todo/todo-route.js";
 import { CustomError } from "./error/CustomError.js";
 import { AuthRequestiddleware } from "./middleware/auth-request-middleware.js";
 import { todolistRouter } from "./v1/todolist/todolist-router.js";
+import { todolistMemberRouter } from "./v1/todolist-member/todolist-member-router.js";
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use("/auth", authRoute);
 app.use(AuthRequestiddleware);
 app.use("/todolist", todolistRouter);
 app.use("/todos", todoRouter);
+app.use("/todolist-member", todolistMemberRouter);
 
 app.use(ErrorHandlerMiddleware);
 app.listen(port, () => {
