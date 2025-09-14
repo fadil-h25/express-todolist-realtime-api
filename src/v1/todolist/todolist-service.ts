@@ -9,11 +9,13 @@ import {
 import { TodolistResponse } from "./dto/todolist-response.js";
 import { logger } from "../../logger/index.js";
 import { generateLogMetaData } from "../../helper/generate-log-meta-data.js";
+import { CustomError } from "../../error/CustomError.js";
+import { todoServiceInstance } from "../todo/todo-service.js";
 
 const serviceName = "todolist-service";
 const domainName = "todolist";
 
-export class Todolist {
+export class TodolistService {
   constructor(private prisma: PrismaClient) {}
 
   async getTodolists(ctx: Context): Promise<TodolistResponse[]> {
@@ -42,14 +44,17 @@ export class Todolist {
 
   async getTodolistById(
     ctx: Context,
-    todolistId: string
-  ): Promise<TodolistResponse[]> {
+    todolistId: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<TodolistResponse> {
     logger.debug(
       "getTodolistById() running",
       generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
     );
 
-    const todolist = await this.prisma.todolist.findMany({
+    const db = tx ?? prisma;
+
+    const todolist = await db.todolist.findUnique({
       where: {
         ownerId: ctx.userId as string,
         id: todolistId,
@@ -65,7 +70,16 @@ export class Todolist {
       },
     });
 
-    return todolist;
+    if (!todolist) throw new CustomError("Todolist not found", 404);
+
+    const todos = await todoServiceInstance.getTodos(ctx, todolistId);
+
+    const response = {
+      ...todolist,
+      todos,
+    };
+
+    return response;
   }
 
   async deleteTodolistById(ctx: Context, todolistId: string): Promise<void> {
@@ -146,4 +160,4 @@ export class Todolist {
   }
 }
 
-export const todolistInstance = new Todolist(prisma);
+export const todolistServiceInstance = new TodolistService(prisma);
