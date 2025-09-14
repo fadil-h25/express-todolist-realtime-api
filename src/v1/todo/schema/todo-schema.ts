@@ -1,6 +1,6 @@
 import z from "zod";
 import { TodoStatus } from "../enum/todo-enum.js";
-import { todolistIdSchema } from "../../todolist/schema/todolist-schema";
+import { todolistIdSchema } from "../../todolist/schema/todolist-schema.js";
 
 export const todoIdSchema = z.uuid();
 export const todoTitleSchema = z.string().min(1);
