@@ -7,16 +7,5 @@ export type TodoResponse = {
   todolistId: string;
   createdAt: Date;
   updatedAt: Date;
-};
-
-export type TodoResponseDetails = {
-  id: string;
-  todolistId: string;
-  title: string;
   description: string | null;
-
-  status: TodoStatus;
-
-  createdAt: Date;
-  updatedAt: Date;
 };
