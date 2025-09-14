@@ -16,8 +16,19 @@ export const CreateTodoSchema = z.object({
 });
 
 export const UpdateTodoSchema = z.object({
+  todolistId: todolistIdSchema,
   id: todoIdSchema,
   title: todoTitleSchema.optional(),
   todoStatus: todoStatusSchema.optional().default(TodoStatus.PROGRESS),
-  description: todoDescriptionSchema,
+  description: todoDescriptionSchema.optional(),
+});
+
+export const GetTodoByIdSchema = z.object({
+  todolistId: todoIdSchema,
+  id: todoIdSchema,
+});
+
+export const DeleteTodoByIdSchema = z.object({
+  todolistId: todoIdSchema,
+  id: todoIdSchema,
 });
