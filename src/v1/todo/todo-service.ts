@@ -3,25 +3,30 @@ import { prisma } from "../../database/index.js";
 import { Context } from "../../types/context.js";
 import { CreateTodoSchema, UpdateTodoSchema } from "./schema/todo-schema.js";
 import { CreateTodoRequest, UpdateTodoRequest } from "./dto/todo-request.js";
-import { TodoResponse, TodoResponseDetails } from "./dto/todo-response.js";
+import { TodoResponse } from "./dto/todo-response.js";
 import { CustomError } from "../../error/CustomError.js";
+import {
+  TodolistService,
+  todolistServiceInstance,
+} from "../todolist/todolist-service.js";
 
 export class TodoService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(
+    private prisma: PrismaClient,
+    private todolistService: TodolistService
+  ) {}
 
-  async createTodo(
-    ctx: Context,
-    data: CreateTodoRequest,
-    tx?: Prisma.TransactionClient
-  ) {
-    const db = tx ?? this.prisma;
-    await db.todo.create({
-      data: {
-        title: data.title,
-        status: data.todoStatus,
-        description: data.description,
-        todolistId: data.todolistId,
-      },
+  async createTodo(ctx: Context, data: CreateTodoRequest) {
+    await this.prisma.$transaction(async (tx) => {
+      await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+      await tx.todo.create({
+        data: {
+          title: data.title,
+          status: data.todoStatus,
+          description: data.description,
+          todolistId: data.todolistId,
+        },
+      });
     });
   }
 
@@ -43,6 +48,7 @@ export class TodoService {
         todolistId: true,
         createdAt: true,
         updatedAt: true,
+        description: true,
       },
     });
 
@@ -53,7 +59,7 @@ export class TodoService {
     ctx: Context,
     id: string,
     tx?: Prisma.TransactionClient
-  ): Promise<TodoResponseDetails> {
+  ): Promise<TodoResponse> {
     const db = tx ?? prisma;
     const todo = await db.todo.findFirst({
       where: {
@@ -105,4 +111,7 @@ export class TodoService {
   }
 }
 
-export const todoServiceInstance = new TodoService(prisma);
+export const todoServiceInstance = new TodoService(
+  prisma,
+  todolistServiceInstance
+);
