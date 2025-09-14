@@ -1,9 +1,11 @@
+import "./config/load-env.js";
+
 import express from "express";
 import { Request, Response } from "express";
 import { globalMiddleware } from "./middleware/global/index.js";
 import { logger } from "./logger/index.js";
 import { generateLogMetaData } from "./helper/generate-log-meta-data.js";
-import dotenv from "dotenv";
+
 import { checkDatabaseConnection } from "./database/index.js";
 import { ErrorHandlerMiddleware } from "./middleware/error-handler-middleware.js";
 import cookieParser from "cookie-parser";
@@ -14,10 +16,6 @@ import { AuthRequestiddleware } from "./middleware/auth-request-middleware.js";
 import { todolistRouter } from "./v1/todolist/todolist-router.js";
 import { todolistMemberRouter } from "./v1/todolist-member/todolist-member-router.js";
 
-dotenv.config({
-  quiet: true,
-});
-
 const app = express();
 checkDatabaseConnection();
 const port = 3000;
@@ -25,9 +23,6 @@ const port = 3000;
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-
-const secretKey = process.env.JWT_SECRET_KEY;
-if (!secretKey) throw new CustomError("Secret key is null", 500);
 
 // Aplly global middlewares
 globalMiddleware.forEach((middleware) => app.use(middleware));
