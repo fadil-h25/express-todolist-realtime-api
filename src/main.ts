@@ -14,7 +14,9 @@ import { AuthRequestiddleware } from "./middleware/auth-request-middleware.js";
 import { todolistRouter } from "./v1/todolist/todolist-router.js";
 import { todolistMemberRouter } from "./v1/todolist-member/todolist-member-router.js";
 
-dotenv.config();
+dotenv.config({
+  quiet: true,
+});
 
 const app = express();
 checkDatabaseConnection();
@@ -24,7 +26,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-const secretKey = process.env.SECRET_KEY;
+const secretKey = process.env.JWT_SECRET_KEY;
 if (!secretKey) throw new CustomError("Secret key is null", 500);
 
 // Aplly global middlewares

@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { v4 } from "uuid";
-import { logger } from "../../logger";
+import { logger } from "../../logger/index.js";
 
 export const RequestContextMiddleware = (
   req: Request,
