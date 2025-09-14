@@ -32,8 +32,8 @@ app.use("/auth", authRoute);
 
 //private route
 app.use(AuthRequestiddleware);
-app.use("/todolist", todolistRouter);
-app.use("/todos", todoRouter);
+app.use("/todolists", todolistRouter);
+app.use("/todolists/:todolistId/todos", todoRouter);
 app.use("/todolist-member", todolistMemberRouter);
 
 app.use(ErrorHandlerMiddleware);
