@@ -124,7 +124,12 @@ export async function handleUpdateTodolistById(
       )
     );
 
-    const validationBody = validate(UpdateTodolistSchema, req.body);
+    const todolistId = req.params.id;
+
+    const validationBody = validate(UpdateTodolistSchema, {
+      ...req.body,
+      id: todolistId,
+    });
 
     const updatedTodolist = await todolistServiceInstance.updateTodolistById(
       req.context,
