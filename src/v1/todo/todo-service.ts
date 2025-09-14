@@ -2,7 +2,12 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "../../database/index.js";
 import { Context } from "../../types/context.js";
 import { CreateTodoSchema, UpdateTodoSchema } from "./schema/todo-schema.js";
-import { CreateTodoRequest, UpdateTodoRequest } from "./dto/todo-request.js";
+import {
+  CreateTodoRequest,
+  DeleteTodoByIdRequest,
+  GetTodoByIdRequest,
+  UpdateTodoRequest,
+} from "./dto/todo-request.js";
 import { TodoResponse } from "./dto/todo-response.js";
 import { CustomError } from "../../error/CustomError.js";
 import {
@@ -30,26 +35,29 @@ export class TodoService {
     });
   }
 
-  async getTodos(
-    ctx: Context,
-    todolistId: string,
-    tx?: Prisma.TransactionClient
-  ): Promise<TodoResponse[]> {
-    const db = tx ?? prisma;
-    const todos = await db.todo.findMany({
-      where: {
+  async getTodos(ctx: Context, todolistId: string): Promise<TodoResponse[]> {
+    const todos = await this.prisma.$transaction(async (tx) => {
+      const todolist = await todolistServiceInstance.getTodolistById(
+        ctx,
         todolistId,
-      },
+        tx
+      );
 
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        todolistId: true,
-        createdAt: true,
-        updatedAt: true,
-        description: true,
-      },
+      return await this.prisma.todo.findMany({
+        where: {
+          todolistId: todolist.id,
+        },
+
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          todolistId: true,
+          createdAt: true,
+          updatedAt: true,
+          description: true,
+        },
+      });
     });
 
     return todos;
@@ -57,13 +65,18 @@ export class TodoService {
 
   async getTodoById(
     ctx: Context,
-    id: string,
+    data: GetTodoByIdRequest,
     tx?: Prisma.TransactionClient
   ): Promise<TodoResponse> {
-    const db = tx ?? prisma;
-    const todo = await db.todo.findFirst({
+    const db = tx ?? this.prisma;
+
+    // pastikan todolist valid & milik user
+    await this.todolistService.getTodolistById(ctx, data.todolistId, db);
+
+    const todo = await db.todo.findUnique({
       where: {
-        id,
+        id: data.id,
+        todolistId: data.todolistId, // pastikan belong to todolist
       },
       select: {
         id: true,
@@ -85,29 +98,44 @@ export class TodoService {
     ctx: Context,
     data: UpdateTodoRequest
   ): Promise<TodoResponse> {
-    const updatedTodo = await prisma.todo.update({
-      where: {
-        id: data.id,
-      },
-      data: {
-        title: data.title ?? undefined,
-        description: data.description ?? undefined,
-        status: data.todoStatus ?? undefined,
-      },
-    });
+    return this.prisma.$transaction(async (tx) => {
+      await this.todolistService.getTodolistById(ctx, data.todolistId, tx);
 
-    return updatedTodo;
+      const todo = await tx.todo.update({
+        where: {
+          id: data.id,
+          todolistId: data.todolistId,
+        },
+        data: {
+          title: data.title ?? undefined,
+          description: data.description ?? undefined,
+          status: data.todoStatus ?? undefined,
+        },
+      });
+
+      return todo;
+    });
   }
 
-  async deleteTodo(ctx: Context, id: string, tx?: Prisma.TransactionClient) {
+  async deleteTodo(
+    ctx: Context,
+    data: DeleteTodoByIdRequest,
+    tx?: Prisma.TransactionClient
+  ) {
     const db = tx ?? this.prisma;
-    const todoId = await db.todo.deleteMany({
+
+    await this.todolistService.getTodolistById(ctx, data.todolistId, db);
+
+    const result = await db.todo.deleteMany({
       where: {
-        id,
+        id: data.id,
+        todolistId: data.todolistId,
       },
     });
 
-    return todoId;
+    if (result.count === 0) throw new CustomError("Todo not found", 404);
+
+    return data.id;
   }
 }
 
