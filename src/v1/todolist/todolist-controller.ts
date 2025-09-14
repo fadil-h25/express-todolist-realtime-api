@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { todolistInstance } from "./todolist-service.js";
+import { todolistServiceInstance } from "./todolist-service.js";
 import { ResponseBody } from "../../types/response/response.js";
 import {
   CreateTodolistSchema,
@@ -29,7 +29,7 @@ export async function handleGetTodolists(
       )
     );
 
-    const todolists = await todolistInstance.getTodolists(req.context);
+    const todolists = await todolistServiceInstance.getTodolists(req.context);
     const responseBody: ResponseBody = {
       success: true,
       message: "Success get data",
@@ -58,7 +58,10 @@ export async function handleGetTodolistById(
     );
 
     const { id } = req.params;
-    const todolist = await todolistInstance.getTodolistById(req.context, id);
+    const todolist = await todolistServiceInstance.getTodolistById(
+      req.context,
+      id
+    );
 
     const responseBody: ResponseBody = {
       success: true,
@@ -89,7 +92,7 @@ export async function handleCreateTodolist(
 
     const validationBody = validate(CreateTodolistSchema, req.body);
 
-    const createdTodolist = await todolistInstance.createTodolist(
+    const createdTodolist = await todolistServiceInstance.createTodolist(
       req.context,
       validationBody
     );
@@ -123,7 +126,7 @@ export async function handleUpdateTodolistById(
 
     const validationBody = validate(UpdateTodolistSchema, req.body);
 
-    const updatedTodolist = await todolistInstance.updateTodolistById(
+    const updatedTodolist = await todolistServiceInstance.updateTodolistById(
       req.context,
       validationBody
     );
@@ -158,7 +161,7 @@ export async function handleDeleteTodolistById(
     const { id } = req.params;
     const validationId = validate(todolistIdSchema, id);
 
-    await todolistInstance.deleteTodolistById(req.context, validationId);
+    await todolistServiceInstance.deleteTodolistById(req.context, validationId);
 
     return res.sendStatus(204);
   } catch (error) {
