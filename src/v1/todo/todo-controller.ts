@@ -3,11 +3,12 @@ import { todoServiceInstance } from "./todo-service.js";
 import { validate } from "../../validation/validate.js";
 import {
   CreateTodoSchema,
-  todoIdSchema,
   UpdateTodoSchema,
+  GetTodoByIdSchema,
+  DeleteTodoByIdSchema,
 } from "./schema/todo-schema.js";
-import { ResponseBody } from "../../types/response/response.js";
 import { todolistIdSchema } from "../todolist/schema/todolist-schema.js";
+import { ResponseBody } from "../../types/response/response.js";
 
 export async function handleCreateTodo(
   req: Request,
@@ -15,7 +16,12 @@ export async function handleCreateTodo(
   next: NextFunction
 ) {
   try {
-    const validationBody = validate(CreateTodoSchema, req.body);
+    // body + path param todolistId
+    const validationBody = validate(CreateTodoSchema, {
+      ...req.body,
+      todolistId: req.params.todolistId,
+    });
+
     await todoServiceInstance.createTodo(req.context, validationBody);
     return res.sendStatus(201);
   } catch (error) {
@@ -23,21 +29,24 @@ export async function handleCreateTodo(
   }
 }
 
-export async function handleDeletodoById(
+export async function handleDeleteTodoById(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const validationTodoId = validate(todoIdSchema, req.params.id);
-
-    const deletedTodId = await todoServiceInstance.deleteTodo(
-      req.context,
-      validationTodoId
-    );
-    res.status(200).json({
-      todoId: deletedTodId,
+    // validasi todolistId + todoId
+    const validationParams = validate(DeleteTodoByIdSchema, {
+      todolistId: req.params.todolistId,
+      id: req.params.id,
     });
+
+    const deletedTodoId = await todoServiceInstance.deleteTodo(
+      req.context,
+      validationParams
+    );
+
+    res.status(200).json({ todoId: deletedTodoId });
   } catch (error) {
     next(error);
   }
@@ -49,13 +58,18 @@ export async function handleGetTodos(
   next: NextFunction
 ) {
   try {
-    const validationTodoId = validate(todolistIdSchema, req.params.todoId);
+    const validationTodolistId = validate(
+      todolistIdSchema,
+      req.params.todolistId
+    );
+
     const todos = await todoServiceInstance.getTodos(
       req.context,
-      validationTodoId
+      validationTodolistId
     );
+
     const resBody: ResponseBody = {
-      message: "Successful get todo data",
+      message: "Successful get todos data",
       success: true,
       data: todos,
     };
@@ -71,11 +85,16 @@ export async function handleGetTodoById(
   next: NextFunction
 ) {
   try {
-    const validationTodoId = validate(todoIdSchema, req.params.id);
+    const validationParams = validate(GetTodoByIdSchema, {
+      todolistId: req.params.todolistId,
+      id: req.params.id,
+    });
+
     const todo = await todoServiceInstance.getTodoById(
       req.context,
-      validationTodoId
+      validationParams
     );
+
     const resBody: ResponseBody = {
       message: "Successful get todo data",
       success: true,
@@ -93,11 +112,17 @@ export async function handleUpdateTodoById(
   next: NextFunction
 ) {
   try {
-    const validationData = validate(UpdateTodoSchema, req.body);
+    const validationData = validate(UpdateTodoSchema, {
+      ...req.body,
+      todolistId: req.params.todolistId,
+      id: req.params.id,
+    });
+
     const updatedTodo = await todoServiceInstance.updateTodoById(
       req.context,
       validationData
     );
+
     const resBody: ResponseBody = {
       message: "Successful update todo data",
       success: true,
