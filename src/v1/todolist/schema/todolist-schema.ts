@@ -26,7 +26,7 @@ export const CreateTodolistSchema = z.object({
 
 export const UpdateTodolistSchema = z.object({
   id: todolistIdSchema,
-  title: todolistTitleSchema,
-  description: todolistDescriptionSchema,
-  isPublic: todolistIsPublicSchema,
+  title: todolistTitleSchema.optional(),
+  description: todolistDescriptionSchema.optional(),
+  isPublic: todolistIsPublicSchema.optional(),
 });
