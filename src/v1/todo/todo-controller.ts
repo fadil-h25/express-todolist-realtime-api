@@ -7,6 +7,7 @@ import {
   UpdateTodoSchema,
 } from "./schema/todo-schema.js";
 import { ResponseBody } from "../../types/response/response.js";
+import { todolistIdSchema } from "../todolist/schema/todolist-schema.js";
 
 export async function handleCreateTodo(
   req: Request,
@@ -48,7 +49,11 @@ export async function handleGetTodos(
   next: NextFunction
 ) {
   try {
-    const todos = await todoServiceInstance.getTodos(req.context);
+    const validationTodoId = validate(todolistIdSchema, req.params.todoId);
+    const todos = await todoServiceInstance.getTodos(
+      req.context,
+      validationTodoId
+    );
     const resBody: ResponseBody = {
       message: "Successful get todo data",
       success: true,
