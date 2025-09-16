@@ -17,3 +17,8 @@ export const UpdateTodolistMemberSchema = z.object({
   role: todolistMemberRoleSchema.optional(),
   todolistId: todolistIdSchema,
 });
+
+export const GetTodolistMembersByIdSchema = z.object({
+  id: todolistMemberIdSchema,
+  todolistId: todolistIdSchema,
+});
