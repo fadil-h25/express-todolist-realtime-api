@@ -46,9 +46,9 @@ CREATE TABLE `todolist_members` (
     `id` VARCHAR(191) NOT NULL,
     `todolistId` VARCHAR(191) NOT NULL,
     `role` ENUM('VISITOR', 'EDITOR') NOT NULL DEFAULT 'VISITOR',
-    `userId` VARCHAR(191) NOT NULL,
+    `memberId` VARCHAR(191) NOT NULL,
 
-    UNIQUE INDEX `todolist_members_todolistId_userId_key`(`todolistId`, `userId`),
+    UNIQUE INDEX `todolist_members_todolistId_memberId_key`(`todolistId`, `memberId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -62,4 +62,4 @@ ALTER TABLE `todolists` ADD CONSTRAINT `todolists_ownerId_fkey` FOREIGN KEY (`ow
 ALTER TABLE `todolist_members` ADD CONSTRAINT `todolist_members_todolistId_fkey` FOREIGN KEY (`todolistId`) REFERENCES `todolists`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `todolist_members` ADD CONSTRAINT `todolist_members_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `todolist_members` ADD CONSTRAINT `todolist_members_memberId_fkey` FOREIGN KEY (`memberId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
