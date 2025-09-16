@@ -35,6 +35,7 @@ export class TodolistMemberService {
       "createTodolistMember running",
       generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
     );
+
     const createdTodolistMember = await this.prisma.$transaction(async (tx) => {
       const member = await this.userService.getUserByEmail(
         ctx,
@@ -76,6 +77,11 @@ export class TodolistMemberService {
     ctx: Context,
     data: UpdateTodolistMemberRequest
   ): Promise<TodolistMemberResponse> {
+    logger.debug(
+      "updateTodolistMember running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
+
     const updatedData = await this.prisma.$transaction(async (tx) => {
       const todolist = await this.todolistService.getTodolistById(
         ctx,
@@ -88,9 +94,14 @@ export class TodolistMemberService {
           id: data.id,
           todolistId: todolist.id,
         },
-
         data: {
           role: data.role ?? undefined,
+        },
+        select: {
+          id: true,
+          role: true,
+          todolistId: true,
+          memberId: true,
         },
       });
       return updatedData;
@@ -103,6 +114,11 @@ export class TodolistMemberService {
     ctx: Context,
     data: GetTodolistMemberByIdRequest
   ): Promise<TodolistMemberResponse> {
+    logger.debug(
+      "getTodolistMemberById running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
+
     const member = await this.prisma.$transaction(async (tx) => {
       const todolist = await this.todolistService.getTodolistById(
         ctx,
@@ -137,6 +153,11 @@ export class TodolistMemberService {
     ctx: Context,
     todolistId: string
   ): Promise<TodolistMemberResponse[]> {
+    logger.debug(
+      "getTodolistMembers running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
+
     const members = await this.prisma.$transaction(async (tx) => {
       const todolist = await this.todolistService.getTodolistById(
         ctx,
