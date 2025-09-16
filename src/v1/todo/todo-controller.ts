@@ -9,6 +9,7 @@ import {
 } from "./schema/todo-schema.js";
 import { todolistIdSchema } from "../todolist/schema/todolist-schema.js";
 import { ResponseBody } from "../../types/response/response.js";
+import { logger } from "../../logger/index.js";
 
 export async function handleCreateTodo(
   req: Request,
@@ -22,8 +23,17 @@ export async function handleCreateTodo(
       todolistId: req.params.todolistId,
     });
 
-    await todoServiceInstance.createTodo(req.context, validationBody);
-    return res.sendStatus(201);
+    const createdTodo = await todoServiceInstance.createTodo(
+      req.context,
+      validationBody
+    );
+
+    const responseBody: ResponseBody = {
+      message: "Successful create todo",
+      data: createdTodo,
+      success: false,
+    };
+    return res.status(200).json(responseBody);
   } catch (error) {
     next(error);
   }
@@ -58,6 +68,7 @@ export async function handleGetTodos(
   next: NextFunction
 ) {
   try {
+    logger.debug(`tets ${req.params.todolistId}`);
     const validationTodolistId = validate(
       todolistIdSchema,
       req.params.todolistId
