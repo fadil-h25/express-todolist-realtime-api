@@ -14,6 +14,8 @@ import {
   TodolistService,
   todolistServiceInstance,
 } from "../todolist/todolist-service.js";
+import { todo } from "node:test";
+import { normalizeString } from "../../util/is-empty-string.js";
 
 export class TodoService {
   constructor(
@@ -21,10 +23,13 @@ export class TodoService {
     private todolistService: TodolistService
   ) {}
 
-  async createTodo(ctx: Context, data: CreateTodoRequest) {
-    await this.prisma.$transaction(async (tx) => {
+  async createTodo(
+    ctx: Context,
+    data: CreateTodoRequest
+  ): Promise<TodoResponse> {
+    const cretedTodo = await this.prisma.$transaction(async (tx) => {
       await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
-      await tx.todo.create({
+      const createdTodo = await tx.todo.create({
         data: {
           title: data.title,
           status: data.todoStatus,
@@ -32,7 +37,10 @@ export class TodoService {
           todolistId: data.todolistId,
         },
       });
+
+      return createdTodo;
     });
+    return cretedTodo;
   }
 
   async getTodos(ctx: Context, todolistId: string): Promise<TodoResponse[]> {
@@ -43,7 +51,7 @@ export class TodoService {
         tx
       );
 
-      return await this.prisma.todo.findMany({
+      return await tx.todo.findMany({
         where: {
           todolistId: todolist.id,
         },
@@ -107,9 +115,9 @@ export class TodoService {
           todolistId: data.todolistId,
         },
         data: {
-          title: data.title ?? undefined,
-          description: data.description ?? undefined,
-          status: data.todoStatus ?? undefined,
+          title: normalizeString(data.title),
+          description: normalizeString(data.description),
+          status: data.status ?? undefined,
         },
       });
 
