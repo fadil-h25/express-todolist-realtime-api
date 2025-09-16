@@ -4,5 +4,5 @@ export type TodolistMemberResponse = {
   id: string;
   role: TodolistMemberRole;
   todolistId: string;
-  userId: string;
+  memberId: string;
 };
