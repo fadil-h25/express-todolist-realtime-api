@@ -75,9 +75,9 @@ model TodolistMember{
   id        String   @id @default(uuid())
   todolistId    String
   role         TodolistMemberRole @default(VISITOR)
-  userId    String
+  memberId    String
   todolist   Todolist     @relation(fields: [todolistId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@unique([todolistId, userId])
+  user      User     @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  @@unique([todolistId, memberId])
   @@map("todolist_members")
 }
