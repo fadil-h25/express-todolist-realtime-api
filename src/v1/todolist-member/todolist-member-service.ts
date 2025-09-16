@@ -8,6 +8,12 @@ import {
 import { Context } from "../../types/context.js";
 import { CreateTodolistMemberRequest } from "./dto/todolist-member-request.js";
 import { TodolistMemberResponse } from "./dto/todolist-member-response.js";
+import { logger } from "../../logger/index.js";
+import { generateLogMetaData } from "../../helper/generate-log-meta-data.js";
+import { CustomError } from "../../error/CustomError.js";
+
+const domainName = "todolist-member";
+const serviceName = "todolist-member-service";
 
 export class TodolistMemberService {
   constructor(
@@ -20,7 +26,21 @@ export class TodolistMemberService {
     ctx: Context,
     data: CreateTodolistMemberRequest
   ): Promise<TodolistMemberResponse> {
+    logger.debug(
+      "createTodolistMember running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
     const createdTodolistMember = await this.prisma.$transaction(async (tx) => {
+      const member = await this.userService.getUserByEmail(
+        ctx,
+        data.memberEmail,
+        tx
+      );
+
+      if (ctx.userId === member.id) {
+        throw new CustomError("Owner cannot be added as a member", 409);
+      }
+
       const todolist = await this.todolistService.getTodolistById(
         ctx,
         data.todolistId,
@@ -30,14 +50,14 @@ export class TodolistMemberService {
       const createdTodolistMember = await tx.todolistMember.create({
         data: {
           role: data.role,
-          userId: ctx.userId as string,
+          memberId: member.id,
           todolistId: todolist.id,
         },
         select: {
           id: true,
           role: true,
           todolistId: true,
-          userId: true,
+          memberId: true,
         },
       });
 
