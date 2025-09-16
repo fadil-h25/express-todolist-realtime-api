@@ -10,7 +10,10 @@ export async function handleCreateTodolistMember(
   next: NextFunction
 ) {
   try {
-    const validationData = validate(CreateTodolistMemberSchema, req.body);
+    const validationData = validate(CreateTodolistMemberSchema, {
+      ...req.body,
+      todolistId: req.params.todolistId,
+    });
 
     const createdTodolistMember =
       await todolistMemberServiceInstance.createTodolistMember(
