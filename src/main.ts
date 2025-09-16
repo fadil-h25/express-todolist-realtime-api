@@ -16,27 +16,50 @@ import { AuthRequestiddleware } from "./middleware/auth-request-middleware.js";
 import { todolistRouter } from "./v1/todolist/todolist-router.js";
 import { todolistMemberRouter } from "./v1/todolist-member/todolist-member-router.js";
 
+import { createServer } from "http";
+import { Server } from "socket.io";
+
 const app = express();
 checkDatabaseConnection();
 const port = 3000;
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// Aplly global middlewares
+// Apply global middlewares
 globalMiddleware.forEach((middleware) => app.use(middleware));
 
-//public route
+// Public route
 app.use("/auth", authRoute);
 
-//private route
+// Private route
 app.use(AuthRequestiddleware);
 app.use("/todolists", todolistRouter);
 app.use("/todolists/:todolistId/todos", todoRouter);
 app.use("/todolists/:todolistId/todolist-members", todolistMemberRouter);
 
+// Error handler
 app.use(ErrorHandlerMiddleware);
-app.listen(port, () => {
+
+io.on("connection", (socket) => {
+  console.log("A user connected: ", socket.id);
+
+  // Event
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected: ", socket.id);
+  });
+});
+
+httpServer.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
