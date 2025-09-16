@@ -1,7 +1,8 @@
 import z from "zod";
 import {
   CreateTodolistMemberSchema,
-  GetTodolistMembersByIdSchema,
+  DeleteTodolistMemberSchema,
+  GetTodolistMemberByIdSchema,
   UpdateTodolistMemberSchema,
 } from "../schema/todolist-member-schema.js";
 
@@ -14,5 +15,9 @@ export type UpdateTodolistMemberRquest = z.infer<
 >;
 
 export type GetTodolistMemberByIdRequest = z.infer<
-  typeof GetTodolistMembersByIdSchema
+  typeof GetTodolistMemberByIdSchema
+>;
+
+export type DeleteTodolistMemberRequest = z.infer<
+  typeof DeleteTodolistMemberSchema
 >;

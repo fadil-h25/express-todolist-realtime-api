@@ -18,7 +18,12 @@ export const UpdateTodolistMemberSchema = z.object({
   todolistId: todolistIdSchema,
 });
 
-export const GetTodolistMembersByIdSchema = z.object({
+export const GetTodolistMemberByIdSchema = z.object({
+  id: todolistMemberIdSchema,
+  todolistId: todolistIdSchema,
+});
+
+export const DeleteTodolistMemberSchema = z.object({
   id: todolistMemberIdSchema,
   todolistId: todolistIdSchema,
 });
