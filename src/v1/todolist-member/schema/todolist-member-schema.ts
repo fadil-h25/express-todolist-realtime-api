@@ -7,7 +7,13 @@ export const todolistMemberIdSchema = z.uuid();
 export const todolistMemberRoleSchema = z.enum(TodolistMemberRole);
 
 export const CreateTodolistMemberSchema = z.object({
-  role: todolistMemberRoleSchema,
+  role: todolistMemberRoleSchema.optional(),
   todolistId: todolistIdSchema,
   userId: userIdSchema,
+});
+
+export const UpdateTodolistMemberSchema = z.object({
+  id: todolistMemberIdSchema,
+  role: todolistMemberRoleSchema.optional(),
+  todolistId: todolistIdSchema,
 });
