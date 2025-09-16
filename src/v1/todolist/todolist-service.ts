@@ -6,7 +6,10 @@ import {
   CreateTodolistRequest,
   UpdateTodolistRequest,
 } from "./dto/todolist-request.js";
-import { TodolistResponse } from "./dto/todolist-response.js";
+import {
+  TodolistResponse,
+  TodolistResponseDetails,
+} from "./dto/todolist-response.js";
 import { logger } from "../../logger/index.js";
 import { generateLogMetaData } from "../../helper/generate-log-meta-data.js";
 import { CustomError } from "../../error/CustomError.js";
@@ -42,6 +45,48 @@ export class TodolistService {
     return todolists;
   }
 
+  async getTodolistByIdWithTodos(
+    ctx: Context,
+    todolistId: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<TodolistResponseDetails> {
+    logger.debug(
+      "getTodolistById() running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
+
+    const db = tx ?? prisma;
+
+    const response = await db.todolist.findUnique({
+      where: {
+        ownerId: ctx.userId as string,
+        id: todolistId,
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        isPublic: true,
+        ownerId: true,
+        createdAt: true,
+        updatedAt: true,
+        todos: {
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+            description: true,
+            status: true,
+            title: true,
+            todolistId: true,
+          },
+        },
+      },
+    });
+    if (!response) throw new CustomError("Todolist ot found", 404);
+    return response;
+  }
+
   async getTodolistById(
     ctx: Context,
     todolistId: string,
@@ -72,16 +117,15 @@ export class TodolistService {
 
     if (!todolist) throw new CustomError("Todolist not found", 404);
 
-    const todos = await todoServiceInstance.getTodos(ctx, todolistId);
+    // const todos = await todoServiceInstance.getTodos(ctx, todolistId);
 
-    const response = {
-      ...todolist,
-      todos,
-    };
+    // const response = {
+    //   ...todolist,
+    //   todos,
+    // };
 
-    return response;
+    return todolist;
   }
-
   async deleteTodolistById(ctx: Context, todolistId: string): Promise<void> {
     logger.debug(
       "deleteTodolistById() running",
