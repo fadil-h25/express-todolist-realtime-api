@@ -6,7 +6,12 @@ import {
   todolistServiceInstance,
 } from "../todolist/todolist-service.js";
 import { Context } from "../../types/context.js";
-import { CreateTodolistMemberRequest } from "./dto/todolist-member-request.js";
+import {
+  CreateTodolistMemberRequest,
+  DeleteTodolistMemberRequest,
+  GetTodolistMemberByIdRequest,
+  UpdateTodolistMemberRequest,
+} from "./dto/todolist-member-request.js";
 import { TodolistMemberResponse } from "./dto/todolist-member-response.js";
 import { logger } from "../../logger/index.js";
 import { generateLogMetaData } from "../../helper/generate-log-meta-data.js";
@@ -65,6 +70,33 @@ export class TodolistMemberService {
     });
 
     return createdTodolistMember;
+  }
+
+  async updateTodolistMember(
+    ctx: Context,
+    data: UpdateTodolistMemberRequest
+  ): Promise<TodolistMemberResponse> {
+    const updatedData = await this.prisma.$transaction(async (tx) => {
+      const todolist = await this.todolistService.getTodolistById(
+        ctx,
+        data.todolistId,
+        tx
+      );
+
+      const updatedData = await tx.todolistMember.update({
+        where: {
+          id: data.id,
+          todolistId: todolist.id,
+        },
+
+        data: {
+          role: data.role ?? undefined,
+        },
+      });
+      return updatedData;
+    });
+
+    return updatedData;
   }
 }
 
