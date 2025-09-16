@@ -98,6 +98,31 @@ export class TodolistMemberService {
 
     return updatedData;
   }
+
+  async getTodolistMembers(
+    ctx: Context,
+    todolistId: string
+  ): Promise<TodolistMemberResponse[]> {
+    const members = await this.prisma.$transaction(async (tx) => {
+      const todolist = await this.todolistService.getTodolistById(
+        ctx,
+        todolistId,
+        tx
+      );
+
+      return await tx.todolistMember.findMany({
+        where: { todolistId: todolist.id },
+        select: {
+          id: true,
+          role: true,
+          todolistId: true,
+          memberId: true,
+        },
+      });
+    });
+
+    return members;
+  }
 }
 
 export const todolistMemberServiceInstance = new TodolistMemberService(
