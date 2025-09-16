@@ -34,7 +34,7 @@ app.use("/auth", authRoute);
 app.use(AuthRequestiddleware);
 app.use("/todolists", todolistRouter);
 app.use("/todolists/:todolistId/todos", todoRouter);
-app.use("/todolist-member", todolistMemberRouter);
+app.use("/todolists/:todolistId/todolist-members", todolistMemberRouter);
 
 app.use(ErrorHandlerMiddleware);
 app.listen(port, () => {
