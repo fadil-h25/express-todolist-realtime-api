@@ -10,7 +10,7 @@ export type CreateTodolistMemberRequest = z.infer<
   typeof CreateTodolistMemberSchema
 >;
 
-export type UpdateTodolistMemberRquest = z.infer<
+export type UpdateTodolistMemberRequest = z.infer<
   typeof UpdateTodolistMemberSchema
 >;
 
