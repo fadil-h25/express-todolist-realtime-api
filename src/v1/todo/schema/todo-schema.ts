@@ -18,9 +18,9 @@ export const CreateTodoSchema = z.object({
 export const UpdateTodoSchema = z.object({
   todolistId: todolistIdSchema,
   id: todoIdSchema,
-  title: todoTitleSchema.optional(),
-  todoStatus: todoStatusSchema.optional().default(TodoStatus.PROGRESS),
-  description: todoDescriptionSchema.optional(),
+  title: todoTitleSchema.optional().nullable(),
+  status: todoStatusSchema.optional().nullable(),
+  description: todoDescriptionSchema.optional().nullable(),
 });
 
 export const GetTodoByIdSchema = z.object({
