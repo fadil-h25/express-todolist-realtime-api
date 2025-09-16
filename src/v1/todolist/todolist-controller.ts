@@ -58,7 +58,7 @@ export async function handleGetTodolistById(
     );
 
     const { id } = req.params;
-    const todolist = await todolistServiceInstance.getTodolistById(
+    const todolist = await todolistServiceInstance.getTodolistByIdWithTodos(
       req.context,
       id
     );
