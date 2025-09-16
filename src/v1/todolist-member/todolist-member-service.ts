@@ -99,6 +99,40 @@ export class TodolistMemberService {
     return updatedData;
   }
 
+  async getTodolistMemberById(
+    ctx: Context,
+    data: GetTodolistMemberByIdRequest
+  ): Promise<TodolistMemberResponse> {
+    const member = await this.prisma.$transaction(async (tx) => {
+      const todolist = await this.todolistService.getTodolistById(
+        ctx,
+        data.todolistId,
+        tx
+      );
+
+      const found = await tx.todolistMember.findUnique({
+        where: {
+          id: data.id,
+          todolistId: todolist.id,
+        },
+        select: {
+          id: true,
+          role: true,
+          todolistId: true,
+          memberId: true,
+        },
+      });
+
+      if (!found) {
+        throw new CustomError("Todolist member not found", 404);
+      }
+
+      return found;
+    });
+
+    return member;
+  }
+
   async getTodolistMembers(
     ctx: Context,
     todolistId: string
