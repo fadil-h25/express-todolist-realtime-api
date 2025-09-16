@@ -13,3 +13,8 @@ export interface UserUpdateMe {
   id: string;
   name: string;
 }
+
+export type GetUserByEmailResponse = {
+  id: string;
+  email: string;
+};
