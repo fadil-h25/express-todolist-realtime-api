@@ -24,7 +24,7 @@ checkDatabaseConnection();
 const port = 3000;
 
 const httpServer = createServer(app);
-const io = new Server(httpServer, {
+export const io = new Server(httpServer, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
@@ -51,15 +51,11 @@ app.use("/todolists/:todolistId/todolist-members", todolistMemberRouter);
 app.use(ErrorHandlerMiddleware);
 
 io.on("connection", (socket) => {
-  console.log("A user connected: ", socket.id);
-
-  // Event
-
   socket.on("disconnect", () => {
-    console.log("User disconnected: ", socket.id);
+    logger.debug("User disconnected: ", socket.id);
   });
 });
 
 httpServer.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  logger.debug(`Example app listening on port ${port}`);
 });
