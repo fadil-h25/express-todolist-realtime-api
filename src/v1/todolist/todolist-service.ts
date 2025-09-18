@@ -115,7 +115,7 @@ export class TodolistService {
       },
     });
 
-    if (!todolist) throw new CustomError("Todolist not found", 404);
+    if (!todolist) throw new CustomError("Access denied for todo", 403);
 
     // const todos = await todoServiceInstance.getTodos(ctx, todolistId);
 
