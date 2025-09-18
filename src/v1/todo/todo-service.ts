@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient, TodolistMemberRole } from "@prisma/client";
 import { prisma } from "../../database/index.js";
 import { Context } from "../../types/context.js";
 import { CreateTodoSchema, UpdateTodoSchema } from "./schema/todo-schema.js";
@@ -6,6 +6,7 @@ import {
   CreateTodoRequest,
   DeleteTodoByIdRequest,
   GetTodoByIdRequest,
+  GetTodosRequest,
   UpdateTodoRequest,
 } from "./dto/todo-request.js";
 import { TodoResponse } from "./dto/todo-response.js";
@@ -16,19 +17,69 @@ import {
 } from "../todolist/todolist-service.js";
 import { todo } from "node:test";
 import { normalizeString } from "../../util/is-empty-string.js";
+import { todolistMemberServiceInstance } from "../todolist-member/todolist-member-service.js";
+import { GetTodolistMemberByMemberId } from "../todolist-member/dto/todolist-member-request.js";
+import { generateLogMetaData } from "../../helper/generate-log-meta-data.js";
+import { logger } from "../../logger/index.js";
 
+const domainName = "todo";
+const serviceName = "todo-service";
 export class TodoService {
   constructor(
     private prisma: PrismaClient,
     private todolistService: TodolistService
   ) {}
 
+  private async checkMemberAccess(
+    ctx: Context,
+    todolistId: string,
+    editorOnly: boolean,
+    tx?: Prisma.TransactionClient
+  ) {
+    logger.debug(
+      "checkMemberAccess() running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
+    const db = tx ?? this.prisma;
+    const validMemberId = await db.todolistMember.findFirst({
+      where: {
+        memberId: ctx.userId,
+        todolistId,
+      },
+
+      select: {
+        memberId: true,
+        role: true,
+        id: true,
+      },
+    });
+
+    if (!validMemberId) throw new CustomError("Access denied for todo", 403);
+
+    logger.debug("validMember role ", validMemberId.role);
+
+    if (editorOnly == true && validMemberId.role != "EDITOR") {
+      throw new CustomError("Access denied for todo", 403);
+    }
+
+    return validMemberId;
+  }
+
   async createTodo(
     ctx: Context,
     data: CreateTodoRequest
   ): Promise<TodoResponse> {
     const cretedTodo = await this.prisma.$transaction(async (tx) => {
-      await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+      logger.debug(
+        "createTodo() running",
+        generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+      );
+      if (data.isOwner) {
+        await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+      } else {
+        await this.checkMemberAccess(ctx, data.todolistId, true, tx);
+      }
+
       const createdTodo = await tx.todo.create({
         data: {
           title: data.title,
@@ -43,17 +94,21 @@ export class TodoService {
     return cretedTodo;
   }
 
-  async getTodos(ctx: Context, todolistId: string): Promise<TodoResponse[]> {
+  async getTodos(ctx: Context, data: GetTodosRequest): Promise<TodoResponse[]> {
+    logger.debug(
+      "getTodos() running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
     const todos = await this.prisma.$transaction(async (tx) => {
-      const todolist = await todolistServiceInstance.getTodolistById(
-        ctx,
-        todolistId,
-        tx
-      );
+      if (data.isOwner == true) {
+        await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+      } else {
+        await this.checkMemberAccess(ctx, data.todolistId, false);
+      }
 
       return await tx.todo.findMany({
         where: {
-          todolistId: todolist.id,
+          todolistId: data.todolistId,
         },
 
         select: {
@@ -76,8 +131,16 @@ export class TodoService {
     data: GetTodoByIdRequest,
     tx?: Prisma.TransactionClient
   ): Promise<TodoResponse> {
+    logger.debug(
+      "getTodoById() running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
     const db = tx ?? this.prisma;
-
+    if (data.isOwner) {
+      await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+    } else {
+      await this.checkMemberAccess(ctx, data.todolistId, false);
+    }
     // pastikan todolist valid & milik user
     await this.todolistService.getTodolistById(ctx, data.todolistId, db);
 
@@ -106,7 +169,16 @@ export class TodoService {
     ctx: Context,
     data: UpdateTodoRequest
   ): Promise<TodoResponse> {
-    return this.prisma.$transaction(async (tx) => {
+    logger.debug(
+      "updateTodoById() running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
+    return await this.prisma.$transaction(async (tx) => {
+      if (data.isOwner) {
+        await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+      } else {
+        await this.checkMemberAccess(ctx, data.todolistId, true);
+      }
       await this.todolistService.getTodolistById(ctx, data.todolistId, tx);
 
       const todo = await tx.todo.update({
@@ -125,23 +197,26 @@ export class TodoService {
     });
   }
 
-  async deleteTodo(
-    ctx: Context,
-    data: DeleteTodoByIdRequest,
-    tx?: Prisma.TransactionClient
-  ) {
-    const db = tx ?? this.prisma;
+  async deleteTodo(ctx: Context, data: DeleteTodoByIdRequest) {
+    logger.debug(
+      "deleteTodo() running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
+    await this.prisma.$transaction(async (tx) => {
+      if (data.isOwner) {
+        await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+      } else {
+        await this.checkMemberAccess(ctx, data.todolistId, true);
+      }
 
-    await this.todolistService.getTodolistById(ctx, data.todolistId, db);
-
-    const result = await db.todo.deleteMany({
-      where: {
-        id: data.id,
-        todolistId: data.todolistId,
-      },
+      await this.todolistService.getTodolistById(ctx, data.todolistId, tx);
+      const result = await tx.todo.delete({
+        where: {
+          id: data.id,
+          todolistId: data.todolistId,
+        },
+      });
     });
-
-    if (result.count === 0) throw new CustomError("Todo not found", 404);
 
     return data.id;
   }
