@@ -10,6 +10,7 @@ import {
   CreateTodolistMemberRequest,
   DeleteTodolistMemberRequest,
   GetTodolistMemberByIdRequest,
+  GetTodolistMemberByMemberId,
   UpdateTodolistMemberRequest,
 } from "./dto/todolist-member-request.js";
 import { TodolistMemberResponse } from "./dto/todolist-member-response.js";
@@ -148,6 +149,48 @@ export class TodolistMemberService {
 
     return member;
   }
+
+  // async getTodolistMemberByMemberId(
+  //   ctx: Context,
+  //   data: GetTodolistMemberByMemberId,
+  //   tx?: Prisma.TransactionClient
+  // ): Promise<TodolistMemberResponse> {
+  //   logger.debug(
+  //     "getTodolistMemberByMemberId running",
+  //     generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+  //   );
+
+  //   const db = tx ?? this.prisma;
+
+  //   const member = await prisma.$transaction(async (tx) => {
+  //     const todolist = await this.todolistService.getTodolistById(
+  //       ctx,
+  //       data.todolistId,
+  //       tx
+  //     );
+
+  //     const found = await tx.todolistMember.findFirst({
+  //       where: {
+  //         memberId: data.memberId,
+  //         todolistId: todolist.id,
+  //       },
+  //       select: {
+  //         id: true,
+  //         role: true,
+  //         todolistId: true,
+  //         memberId: true,
+  //       },
+  //     });
+
+  //     if (!found) {
+  //       throw new CustomError("Todolist member not found", 404);
+  //     }
+
+  //     return found;
+  //   });
+
+  //   return member;
+  // }
 
   async getTodolistMembers(
     ctx: Context,
