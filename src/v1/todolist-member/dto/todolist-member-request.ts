@@ -21,3 +21,8 @@ export type GetTodolistMemberByIdRequest = z.infer<
 export type DeleteTodolistMemberRequest = z.infer<
   typeof DeleteTodolistMemberSchema
 >;
+
+export type GetTodolistMemberByMemberId = {
+  memberId: string;
+  todolistId: string;
+};
