@@ -13,6 +13,7 @@ export const CreateTodoSchema = z.object({
   description: todoDescriptionSchema,
   todoStatus: todoStatusSchema.optional().default(TodoStatus.PROGRESS),
   todolistId: todolistIdSchema,
+  isOwner: z.boolean().optional().nullable(),
 });
 
 export const UpdateTodoSchema = z.object({
@@ -21,14 +22,22 @@ export const UpdateTodoSchema = z.object({
   title: todoTitleSchema.optional().nullable(),
   status: todoStatusSchema.optional().nullable(),
   description: todoDescriptionSchema.optional().nullable(),
+  isOwner: z.boolean().optional().nullable(),
 });
 
 export const GetTodoByIdSchema = z.object({
   todolistId: todoIdSchema,
   id: todoIdSchema,
+  isOwner: z.boolean().optional().nullable(),
+});
+
+export const GetTodosSchema = z.object({
+  todolistId: todoIdSchema,
+  isOwner: z.boolean().optional().nullable(),
 });
 
 export const DeleteTodoByIdSchema = z.object({
   todolistId: todoIdSchema,
   id: todoIdSchema,
+  isOwner: z.boolean().optional().nullable(),
 });
