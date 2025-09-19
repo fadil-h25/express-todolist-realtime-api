@@ -17,7 +17,10 @@ import {
 } from "../todolist/todolist-service.js";
 import { todo } from "node:test";
 import { normalizeString } from "../../util/is-empty-string.js";
-import { todolistMemberServiceInstance } from "../todolist-member/todolist-member-service.js";
+import {
+  TodolistMemberService,
+  todolistMemberServiceInstance,
+} from "../todolist-member/todolist-member-service.js";
 import { GetTodolistMemberByMemberId } from "../todolist-member/dto/todolist-member-request.js";
 import { generateLogMetaData } from "../../helper/generate-log-meta-data.js";
 import { logger } from "../../logger/index.js";
@@ -27,45 +30,9 @@ const serviceName = "todo-service";
 export class TodoService {
   constructor(
     private prisma: PrismaClient,
-    private todolistService: TodolistService
+    private todolistService: TodolistService,
+    private todolistMemberServiceInstance: TodolistMemberService
   ) {}
-
-  private async checkMemberAccess(
-    ctx: Context,
-    todolistId: string,
-    editorOnly: boolean,
-    tx?: Prisma.TransactionClient
-  ) {
-    logger.debug(
-      "checkMemberAccess() running",
-      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
-    );
-    const db = tx ?? this.prisma;
-    const validMemberId = await db.todolistMember.findFirst({
-      where: {
-        memberId: ctx.userId,
-        todolistId,
-      },
-
-      select: {
-        memberId: true,
-        role: true,
-        id: true,
-      },
-    });
-
-    if (!validMemberId)
-      throw new CustomError("Access denied for todo, only for member", 403);
-
-    if (editorOnly == true && validMemberId.role != "EDITOR") {
-      throw new CustomError(
-        "Access denied for todo, only for member with role editor",
-        403
-      );
-    }
-
-    return validMemberId;
-  }
 
   async createTodo(
     ctx: Context,
@@ -88,7 +55,12 @@ export class TodoService {
             403
           );
       } else {
-        await this.checkMemberAccess(ctx, data.todolistId, true, tx);
+        await todolistMemberServiceInstance.checkMemberAccess(
+          ctx,
+          data.todolistId,
+          true,
+          tx
+        );
       }
 
       const createdTodo = await tx.todo.create({
@@ -123,7 +95,11 @@ export class TodoService {
             403
           );
       } else {
-        await this.checkMemberAccess(ctx, data.todolistId, false);
+        await todolistMemberServiceInstance.checkMemberAccess(
+          ctx,
+          data.todolistId,
+          false
+        );
       }
 
       return await tx.todo.findMany({
@@ -169,7 +145,11 @@ export class TodoService {
             403
           );
       } else {
-        await this.checkMemberAccess(ctx, data.todolistId, true);
+        await todolistMemberServiceInstance.checkMemberAccess(
+          ctx,
+          data.todolistId,
+          true
+        );
       }
 
       // pastikan todolist valid & milik user
@@ -219,7 +199,11 @@ export class TodoService {
             403
           );
       } else {
-        await this.checkMemberAccess(ctx, data.todolistId, true);
+        await todolistMemberServiceInstance.checkMemberAccess(
+          ctx,
+          data.todolistId,
+          true
+        );
       }
       await this.todolistService.getTodolistById(ctx, data.todolistId, tx);
 
@@ -257,7 +241,11 @@ export class TodoService {
             403
           );
       } else {
-        await this.checkMemberAccess(ctx, data.todolistId, true);
+        await todolistMemberServiceInstance.checkMemberAccess(
+          ctx,
+          data.todolistId,
+          true
+        );
       }
 
       await this.todolistService.getTodolistById(ctx, data.todolistId, tx);
@@ -275,5 +263,6 @@ export class TodoService {
 
 export const todoServiceInstance = new TodoService(
   prisma,
-  todolistServiceInstance
+  todolistServiceInstance,
+  todolistMemberServiceInstance
 );

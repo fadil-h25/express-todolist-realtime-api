@@ -28,6 +28,43 @@ export class TodolistMemberService {
     private todolistService: TodolistService
   ) {}
 
+  async checkMemberAccess(
+    ctx: Context,
+    todolistId: string,
+    editorOnly: boolean,
+    tx?: Prisma.TransactionClient
+  ) {
+    logger.debug(
+      "checkMemberAccess() running",
+      generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
+    );
+    const db = tx ?? this.prisma;
+    const validMemberId = await db.todolistMember.findFirst({
+      where: {
+        memberId: ctx.userId,
+        todolistId,
+      },
+
+      select: {
+        memberId: true,
+        role: true,
+        id: true,
+      },
+    });
+
+    if (!validMemberId)
+      throw new CustomError("Access denied for todo, only for member", 403);
+
+    if (editorOnly == true && validMemberId.role != "EDITOR") {
+      throw new CustomError(
+        "Access denied for todo, only for member with role editor",
+        403
+      );
+    }
+
+    return validMemberId;
+  }
+
   async createTodolistMember(
     ctx: Context,
     data: CreateTodolistMemberRequest
