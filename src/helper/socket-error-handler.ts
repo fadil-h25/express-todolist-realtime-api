@@ -1,9 +1,9 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { ZodError } from "zod";
-import { prismaErrorMapper } from "./prisma-error-mapper";
-import { ZodErrorMapper } from "./zod-error-mapper";
-import { ResponseErrorBody } from "../types/response/response-error-body";
-import { logger } from "../logger";
+import { prismaErrorMapper } from "./prisma-error-mapper.js";
+import { ZodErrorMapper } from "./zod-error-mapper.js";
+import { ResponseErrorBody } from "../types/response/response-error-body.js";
+import { logger } from "../logger/index.js";
 
 export function socketErrorHandler(err: unknown): ResponseErrorBody {
   logger.debug("socketErrorMapper running()");

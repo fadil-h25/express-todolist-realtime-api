@@ -1,6 +1,6 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { logger } from "../logger";
-import { ResponseErrorBody } from "../types/response/response-error-body";
+import { logger } from "../logger/index.js";
+import { ResponseErrorBody } from "../types/response/response-error-body.js";
 
 export function prismaErrorMapper(
   err: PrismaClientKnownRequestError
