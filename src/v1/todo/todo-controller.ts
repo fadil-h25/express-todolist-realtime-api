@@ -11,6 +11,9 @@ import {
 import { todolistIdSchema } from "../todolist/schema/todolist-schema.js";
 import { ResponseBody } from "../../types/response/response.js";
 import { logger } from "../../logger/index.js";
+import { io } from "../../main.js";
+import { TodoSocketEvent } from "./enum/todo-socket-event.js";
+import { TodolistSocketEvent } from "../todolist/enum/todolist-socket-event.js";
 
 export async function handleCreateTodo(
   req: Request,
@@ -18,7 +21,6 @@ export async function handleCreateTodo(
   next: NextFunction
 ) {
   try {
-    // body + path param todolistId
     const validationBody = validate(CreateTodoSchema, {
       ...req.body,
       todolistId: req.params.todolistId,
@@ -29,10 +31,15 @@ export async function handleCreateTodo(
       validationBody
     );
 
+    io.to(TodolistSocketEvent.todolistRoomPrefix + createdTodo.todolistId).emit(
+      TodoSocketEvent.createdTodo,
+      createdTodo
+    );
+
     const responseBody: ResponseBody = {
       message: "Successful create todo",
       data: createdTodo,
-      success: false,
+      success: true,
     };
     return res.status(200).json(responseBody);
   } catch (error) {
@@ -46,7 +53,6 @@ export async function handleDeleteTodoById(
   next: NextFunction
 ) {
   try {
-    // validasi todolistId + todoId
     const validationParams = validate(DeleteTodoByIdSchema, {
       todolistId: req.params.todolistId,
       id: req.params.id,
@@ -58,7 +64,11 @@ export async function handleDeleteTodoById(
       validationParams
     );
 
-    res.status(200).json({ todoId: deletedTodoId });
+    io.to(
+      TodolistSocketEvent.todolistRoomPrefix + validationParams.todolistId
+    ).emit(TodoSocketEvent.deletedTodo, { id: deletedTodoId });
+
+    return res.status(200).json({ todoId: deletedTodoId });
   } catch (error) {
     next(error);
   }
@@ -70,7 +80,6 @@ export async function handleGetTodos(
   next: NextFunction
 ) {
   try {
-    logger.debug(`tets ${req.params.todolistId}`);
     const validationData = validate(GetTodosSchema, {
       ...req.body,
       todolistId: req.params.todolistId,
@@ -136,6 +145,10 @@ export async function handleUpdateTodoById(
       req.context,
       validationData
     );
+
+    io.to(
+      TodolistSocketEvent.todolistRoomPrefix + validationData.todolistId
+    ).emit(TodoSocketEvent.updatedTodo, updatedTodo);
 
     const resBody: ResponseBody = {
       message: "Successful update todo data",
