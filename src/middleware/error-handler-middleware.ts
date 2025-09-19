@@ -47,7 +47,7 @@ export const ErrorHandlerMiddleware = (
           message: `Duplicate value for ${targetField}`,
           success: false,
         };
-        return res.status(400).json(responseErrorBody);
+        return res.status(409).json(responseErrorBody);
 
       case "P2003": // Foreign key constraint failed
         responseErrorBody = {
