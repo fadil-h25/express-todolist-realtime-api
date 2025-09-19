@@ -18,9 +18,16 @@ import { todolistMemberRouter } from "./v1/todolist-member/todolist-member-route
 
 import { createServer } from "http";
 import { Server } from "socket.io";
+import "./database/db-redis.js";
+import { registerTodolistGateway } from "./v1/todolist/todolist-register.js";
+import { registerTodoGateway } from "./v1/todo/register-todo-gateway.js";
+import { socketContextMidlleware } from "./middleware/socket-context-middleware.js";
+import { socketAuthMiddlewre } from "./middleware/socket-auth-middleware.js";
+import { registerUserGateway } from "./v1/user/register-user-gateway.js";
 
 const app = express();
 checkDatabaseConnection();
+
 const port = 3000;
 
 const httpServer = createServer(app);
@@ -50,7 +57,15 @@ app.use("/todolists/:todolistId/todolist-members", todolistMemberRouter);
 // Error handler
 app.use(ErrorHandlerMiddleware);
 
+//end of http
+
+//Socket
+io.use(socketContextMidlleware);
+io.use(socketAuthMiddlewre);
 io.on("connection", (socket) => {
+  registerUserGateway(socket);
+  registerTodolistGateway(socket);
+  registerTodoGateway(socket);
   socket.on("disconnect", () => {
     logger.debug("User disconnected: ", socket.id);
   });
