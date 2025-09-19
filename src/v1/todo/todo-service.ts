@@ -25,6 +25,8 @@ import { GetTodolistMemberByMemberId } from "../todolist-member/dto/todolist-mem
 import { generateLogMetaData } from "../../helper/generate-log-meta-data.js";
 import { logger } from "../../logger/index.js";
 
+import { redisClient } from "../../database/db-redis.js";
+
 const domainName = "todo";
 const serviceName = "todo-service";
 export class TodoService {
@@ -49,11 +51,11 @@ export class TodoService {
           data.todolistId,
           tx
         );
-        if (todolist.isPublic == false)
-          throw new CustomError(
-            "Access denied, this data is not for public",
-            403
-          );
+        // if (todolist.isPublic == false)
+        //   throw new CustomError(
+        //     "Access denied, this data is not for public",
+        //     403
+        //   );
       } else {
         await todolistMemberServiceInstance.checkMemberAccess(
           ctx,
@@ -74,6 +76,10 @@ export class TodoService {
 
       return createdTodo;
     });
+
+    // Invalidate cache
+    await redisClient.del(`todos:${data.todolistId}`);
+
     return cretedTodo;
   }
 
@@ -82,6 +88,14 @@ export class TodoService {
       "getTodos() running",
       generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
     );
+
+    const cacheKey = `todos:${data.todolistId}`;
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
+      logger.debug("getTodos() cache hit");
+      return JSON.parse(cached);
+    }
+
     const todos = await this.prisma.$transaction(async (tx) => {
       if (data.isOwner == true) {
         const todolist = await todolistServiceInstance.getTodolistById(
@@ -89,11 +103,11 @@ export class TodoService {
           data.todolistId,
           tx
         );
-        if (todolist.isPublic == false)
-          throw new CustomError(
-            "Access denied, this data is not for public",
-            403
-          );
+        // if (todolist.isPublic == false)
+        //   throw new CustomError(
+        //     "Access denied, this data is not for public",
+        //     403
+        //   );
       } else {
         await todolistMemberServiceInstance.checkMemberAccess(
           ctx,
@@ -119,6 +133,8 @@ export class TodoService {
       });
     });
 
+    await redisClient.set(cacheKey, JSON.stringify(todos), { EX: 60 });
+
     return todos;
   }
 
@@ -132,6 +148,13 @@ export class TodoService {
       generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
     );
 
+    const cacheKey = `todo:${data.id}`;
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
+      logger.debug("getTodoById() cache hit");
+      return JSON.parse(cached);
+    }
+
     const todo = await this.prisma.$transaction(async (tx) => {
       if (data.isOwner) {
         const todolist = await todolistServiceInstance.getTodolistById(
@@ -139,11 +162,11 @@ export class TodoService {
           data.todolistId,
           tx
         );
-        if (todolist.isPublic == false)
-          throw new CustomError(
-            "Access denied, this data is not for public",
-            403
-          );
+        // if (todolist.isPublic == false)
+        //   throw new CustomError(
+        //     "Access denied, this data is not for public",
+        //     403
+        //   );
       } else {
         await todolistMemberServiceInstance.checkMemberAccess(
           ctx,
@@ -153,7 +176,6 @@ export class TodoService {
       }
 
       // pastikan todolist valid & milik user
-
       const todo = await tx.todo.findUnique({
         where: {
           id: data.id,
@@ -175,6 +197,8 @@ export class TodoService {
 
     if (!todo) throw new CustomError("Todo not found", 404);
 
+    await redisClient.set(cacheKey, JSON.stringify(todo), { EX: 60 });
+
     return todo;
   }
 
@@ -186,18 +210,18 @@ export class TodoService {
       "updateTodoById() running",
       generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
     );
-    return await this.prisma.$transaction(async (tx) => {
+    const todo = await this.prisma.$transaction(async (tx) => {
       if (data.isOwner) {
         const todolist = await todolistServiceInstance.getTodolistById(
           ctx,
           data.todolistId,
           tx
         );
-        if (todolist.isPublic == false)
-          throw new CustomError(
-            "Access denied, this data is not for public",
-            403
-          );
+        // if (todolist.isPublic == false)
+        //   throw new CustomError(
+        //     "Access denied, this data is not for public",
+        //     403
+        //   );
       } else {
         await todolistMemberServiceInstance.checkMemberAccess(
           ctx,
@@ -221,6 +245,12 @@ export class TodoService {
 
       return todo;
     });
+
+    // Invalidate cache
+    await redisClient.del(`todo:${data.id}`);
+    await redisClient.del(`todos:${data.todolistId}`);
+
+    return todo;
   }
 
   async deleteTodo(ctx: Context, data: DeleteTodoByIdRequest) {
@@ -235,11 +265,11 @@ export class TodoService {
           data.todolistId,
           tx
         );
-        if (todolist.isPublic == false)
-          throw new CustomError(
-            "Access denied, this data is not for public",
-            403
-          );
+        // if (todolist.isPublic == false)
+        //   throw new CustomError(
+        //     "Access denied, this data is not for public",
+        //     403
+        //   );
       } else {
         await todolistMemberServiceInstance.checkMemberAccess(
           ctx,
@@ -256,6 +286,10 @@ export class TodoService {
         },
       });
     });
+
+    // Invalidate cache
+    await redisClient.del(`todo:${data.id}`);
+    await redisClient.del(`todos:${data.todolistId}`);
 
     return data.id;
   }
