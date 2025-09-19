@@ -54,12 +54,14 @@ export class TodoService {
       },
     });
 
-    if (!validMemberId) throw new CustomError("Access denied for todo", 403);
-
-    logger.debug("validMember role ", validMemberId.role);
+    if (!validMemberId)
+      throw new CustomError("Access denied for todo, only for member", 403);
 
     if (editorOnly == true && validMemberId.role != "EDITOR") {
-      throw new CustomError("Access denied for todo", 403);
+      throw new CustomError(
+        "Access denied for todo, only for member with role editor",
+        403
+      );
     }
 
     return validMemberId;
@@ -135,29 +137,33 @@ export class TodoService {
       "getTodoById() running",
       generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
     );
-    const db = tx ?? this.prisma;
-    if (data.isOwner) {
-      await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
-    } else {
-      await this.checkMemberAccess(ctx, data.todolistId, false);
-    }
-    // pastikan todolist valid & milik user
-    await this.todolistService.getTodolistById(ctx, data.todolistId, db);
 
-    const todo = await db.todo.findUnique({
-      where: {
-        id: data.id,
-        todolistId: data.todolistId, // pastikan belong to todolist
-      },
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        description: true,
-        createdAt: true,
-        updatedAt: true,
-        todolistId: true,
-      },
+    const todo = await this.prisma.$transaction(async (tx) => {
+      if (data.isOwner) {
+        await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+      } else {
+        await this.checkMemberAccess(ctx, data.todolistId, true);
+      }
+
+      // pastikan todolist valid & milik user
+
+      const todo = await tx.todo.findUnique({
+        where: {
+          id: data.id,
+          todolistId: data.todolistId, // pastikan belong to todolist
+        },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          description: true,
+          createdAt: true,
+          updatedAt: true,
+          todolistId: true,
+        },
+      });
+
+      return todo;
     });
 
     if (!todo) throw new CustomError("Todo not found", 404);
