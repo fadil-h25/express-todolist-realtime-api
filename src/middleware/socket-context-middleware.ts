@@ -1,9 +1,9 @@
 import { SocketData, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 import { CustomError } from "../error/CustomError";
-import { logger } from "../logger";
+import { logger } from "../logger/index.js";
 import { v4 } from "uuid";
-import { SocketContext } from "../types/context";
+import { SocketContext } from "../types/context.js";
 
 export function socketContextMidlleware(
   socket: Socket,
