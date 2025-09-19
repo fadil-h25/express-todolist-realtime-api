@@ -6,6 +6,7 @@ import {
   UpdateTodoSchema,
   GetTodoByIdSchema,
   DeleteTodoByIdSchema,
+  GetTodosSchema,
 } from "./schema/todo-schema.js";
 import { todolistIdSchema } from "../todolist/schema/todolist-schema.js";
 import { ResponseBody } from "../../types/response/response.js";
@@ -49,6 +50,7 @@ export async function handleDeleteTodoById(
     const validationParams = validate(DeleteTodoByIdSchema, {
       todolistId: req.params.todolistId,
       id: req.params.id,
+      ...req.body,
     });
 
     const deletedTodoId = await todoServiceInstance.deleteTodo(
@@ -69,14 +71,14 @@ export async function handleGetTodos(
 ) {
   try {
     logger.debug(`tets ${req.params.todolistId}`);
-    const validationTodolistId = validate(
-      todolistIdSchema,
-      req.params.todolistId
-    );
+    const validationData = validate(GetTodosSchema, {
+      ...req.body,
+      todolistId: req.params.todolistId,
+    });
 
     const todos = await todoServiceInstance.getTodos(
       req.context,
-      validationTodolistId
+      validationData
     );
 
     const resBody: ResponseBody = {
@@ -96,14 +98,15 @@ export async function handleGetTodoById(
   next: NextFunction
 ) {
   try {
-    const validationParams = validate(GetTodoByIdSchema, {
+    const validationData = validate(GetTodoByIdSchema, {
       todolistId: req.params.todolistId,
       id: req.params.id,
+      ...req.body,
     });
 
     const todo = await todoServiceInstance.getTodoById(
       req.context,
-      validationParams
+      validationData
     );
 
     const resBody: ResponseBody = {
