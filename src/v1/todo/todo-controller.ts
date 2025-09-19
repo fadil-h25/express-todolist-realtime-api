@@ -146,9 +146,10 @@ export async function handleUpdateTodoById(
       validationData
     );
 
-    io.to(
-      TodolistSocketEvent.todolistRoomPrefix + validationData.todolistId
-    ).emit(TodoSocketEvent.updatedTodo, updatedTodo);
+    io.to(TodolistSocketEvent.todolistRoomPrefix + updatedTodo.todolistId).emit(
+      TodoSocketEvent.updatedTodo,
+      updatedTodo
+    );
 
     const resBody: ResponseBody = {
       message: "Successful update todo data",
