@@ -77,7 +77,16 @@ export class TodoService {
         generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
       );
       if (data.isOwner) {
-        await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+        const todolist = await todolistServiceInstance.getTodolistById(
+          ctx,
+          data.todolistId,
+          tx
+        );
+        if (todolist.isPublic == false)
+          throw new CustomError(
+            "Access denied, this data is not for public",
+            403
+          );
       } else {
         await this.checkMemberAccess(ctx, data.todolistId, true, tx);
       }
@@ -103,7 +112,16 @@ export class TodoService {
     );
     const todos = await this.prisma.$transaction(async (tx) => {
       if (data.isOwner == true) {
-        await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+        const todolist = await todolistServiceInstance.getTodolistById(
+          ctx,
+          data.todolistId,
+          tx
+        );
+        if (todolist.isPublic == false)
+          throw new CustomError(
+            "Access denied, this data is not for public",
+            403
+          );
       } else {
         await this.checkMemberAccess(ctx, data.todolistId, false);
       }
@@ -140,7 +158,16 @@ export class TodoService {
 
     const todo = await this.prisma.$transaction(async (tx) => {
       if (data.isOwner) {
-        await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+        const todolist = await todolistServiceInstance.getTodolistById(
+          ctx,
+          data.todolistId,
+          tx
+        );
+        if (todolist.isPublic == false)
+          throw new CustomError(
+            "Access denied, this data is not for public",
+            403
+          );
       } else {
         await this.checkMemberAccess(ctx, data.todolistId, true);
       }
@@ -181,7 +208,16 @@ export class TodoService {
     );
     return await this.prisma.$transaction(async (tx) => {
       if (data.isOwner) {
-        await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+        const todolist = await todolistServiceInstance.getTodolistById(
+          ctx,
+          data.todolistId,
+          tx
+        );
+        if (todolist.isPublic == false)
+          throw new CustomError(
+            "Access denied, this data is not for public",
+            403
+          );
       } else {
         await this.checkMemberAccess(ctx, data.todolistId, true);
       }
@@ -210,7 +246,16 @@ export class TodoService {
     );
     await this.prisma.$transaction(async (tx) => {
       if (data.isOwner) {
-        await todolistServiceInstance.getTodolistById(ctx, data.todolistId, tx);
+        const todolist = await todolistServiceInstance.getTodolistById(
+          ctx,
+          data.todolistId,
+          tx
+        );
+        if (todolist.isPublic == false)
+          throw new CustomError(
+            "Access denied, this data is not for public",
+            403
+          );
       } else {
         await this.checkMemberAccess(ctx, data.todolistId, true);
       }
