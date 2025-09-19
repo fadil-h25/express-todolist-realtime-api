@@ -6,3 +6,13 @@ export type TodolistMemberResponse = {
   todolistId: string;
   memberId: string;
 };
+
+export type CheckAccessMemberResponse = {
+  id: string;
+  role: TodolistMemberRole;
+  todolistId: string;
+  memberId: string;
+  todolist: {
+    isPublic: boolean;
+  };
+};

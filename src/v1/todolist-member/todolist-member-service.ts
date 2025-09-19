@@ -13,7 +13,10 @@ import {
   GetTodolistMemberByMemberId,
   UpdateTodolistMemberRequest,
 } from "./dto/todolist-member-request.js";
-import { TodolistMemberResponse } from "./dto/todolist-member-response.js";
+import {
+  CheckAccessMemberResponse,
+  TodolistMemberResponse,
+} from "./dto/todolist-member-response.js";
 import { logger } from "../../logger/index.js";
 import { generateLogMetaData } from "../../helper/generate-log-meta-data.js";
 import { CustomError } from "../../error/CustomError.js";
@@ -33,13 +36,13 @@ export class TodolistMemberService {
     todolistId: string,
     editorOnly: boolean,
     tx?: Prisma.TransactionClient
-  ) {
+  ): Promise<CheckAccessMemberResponse> {
     logger.debug(
       "checkMemberAccess() running",
       generateLogMetaData(ctx.reqId, ctx.route, domainName, serviceName)
     );
     const db = tx ?? this.prisma;
-    const validMemberId = await db.todolistMember.findFirst({
+    const validMember = await db.todolistMember.findFirst({
       where: {
         memberId: ctx.userId,
         todolistId,
@@ -49,20 +52,26 @@ export class TodolistMemberService {
         memberId: true,
         role: true,
         id: true,
+        todolistId: true,
+        todolist: {
+          select: {
+            isPublic: true,
+          },
+        },
       },
     });
 
-    if (!validMemberId)
+    if (!validMember)
       throw new CustomError("Access denied for todo, only for member", 403);
 
-    if (editorOnly == true && validMemberId.role != "EDITOR") {
+    if (editorOnly == true && validMember.role != "EDITOR") {
       throw new CustomError(
         "Access denied for todo, only for member with role editor",
         403
       );
     }
 
-    return validMemberId;
+    return validMember;
   }
 
   async createTodolistMember(
